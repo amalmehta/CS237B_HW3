@@ -17,9 +17,12 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.GlorotUniform (this is what we tried)
         #         - tf.keras.initializers.GlorotNormal
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
+        #self.trainable_variables = []
         initializer = tf.keras.initializers.GlorotUniform()
         self.dense1 = tf.keras.layers.Dense(7, activation = "relu", kernel_initializer=initializer)
         self.dense2 = tf.keras.layers.Dense(out_size, activation = "relu", kernel_initializer=initializer)
+        # self.trainable_variables.append(self.dense1)
+        # self.trainable_variables.append(self.dense2)
 
         ########## Your code ends here ##########
 
@@ -51,8 +54,9 @@ def loss(y_est, y):
     throttle_dim =1 
     steering_weight = 3
     throttle_weight = 1
-    return steering_weight*tf.nn.l2_loss(tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
-
+    l = steering_weight*tf.nn.l2_loss(tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
+    print(l)
+    return l
 
     ########## Your code ends here ##########
     
@@ -87,7 +91,7 @@ def nn(data, args):
         l = loss(logits, y)
         with tf.GradientTape() as g:
             g.watch(nn_model.trainable_variables)
-        grads = g.gradient(l, nn_model.trainable_variables)
+            grads = g.gradient(l, nn_model.trainable_variables)
         optimizer.apply_gradients(zip(grads, nn_model.trainable_variables))
         
 
