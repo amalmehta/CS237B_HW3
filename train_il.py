@@ -17,7 +17,8 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.GlorotUniform (this is what we tried)
         #         - tf.keras.initializers.GlorotNormal
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
-
+        initializer = tf.keras.initializers.GlorotUniform()
+        dense1 = tf.keras.layers.Dense(3, kernel_initializer=initializer)
 
 
         ########## Your code ends here ##########
