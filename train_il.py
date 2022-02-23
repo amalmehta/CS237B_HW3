@@ -18,8 +18,8 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.GlorotNormal
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
         initializer = tf.keras.initializers.GlorotUniform()
-        dense1 = tf.keras.layers.Dense(3, kernel_initializer=initializer)
-
+        self.dense1 = tf.keras.layers.Dense(7, activation = "relu", kernel_initializer=initializer)
+        self.dense2 = tf.keras.layers.Dense(out_size, activation = "relu", kernel_initializer=initializer)
 
         ########## Your code ends here ##########
 
@@ -28,6 +28,11 @@ class NN(tf.keras.Model):
         ######### Your code starts here #########
         # We want to perform a forward-pass of the network. Using the weights and biases, this function should give the network output for x where:
         # x is a (?,|O|) tensor that keeps a batch of observations
+
+        out1 = self.dense1(x)
+        out2 = self.dense2(out1)
+
+        return out2 
 
 
 
@@ -42,7 +47,11 @@ def loss(y_est, y):
     # - y is the actions the expert took for the corresponding batch of observations
     # At the end your code should return the scalar loss value.
     # HINT: Remember, you can penalize steering (0th dimension) and throttle (1st dimension) unequally
-
+    steering_dim = 0
+    throttle_dim =1 
+    steering_weight = 3
+    throttle_weight = 1
+    return steering_weight*tf.nn.l2_loss(tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
 
 
     ########## Your code ends here ##########
@@ -74,7 +83,12 @@ def nn(data, args):
         # 3. Based on the loss calculate the gradient for all weights
         # 4. Run an optimization step on the weights.
         # Helpful Functions: tf.GradientTape(), tf.GradientTape.gradient(), tf.keras.Optimizer.apply_gradients
-        
+        logits = nn_model.call(x)
+        loss = loss(logits, y)
+        with tf.GradientTape() as g:
+            g.watch(nn_model.dense1)
+            g.watch(nn_model.dense2)
+
         
 
         ########## Your code ends here ##########
