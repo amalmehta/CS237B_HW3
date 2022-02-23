@@ -86,9 +86,10 @@ def nn(data, args):
         logits = nn_model.call(x)
         loss = loss(logits, y)
         with tf.GradientTape() as g:
-            g.watch(nn_model.dense1)
-            g.watch(nn_model.dense2)
+            g.watch(nn_model.v
+            grads = g.gradient(loss)
 
+        optimizer.apply_gradients
         
 
         ########## Your code ends here ##########
