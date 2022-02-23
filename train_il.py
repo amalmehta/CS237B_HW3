@@ -84,12 +84,11 @@ def nn(data, args):
         # 4. Run an optimization step on the weights.
         # Helpful Functions: tf.GradientTape(), tf.GradientTape.gradient(), tf.keras.Optimizer.apply_gradients
         logits = nn_model.call(x)
-        loss = loss(logits, y)
+        l = loss(logits, y)
         with tf.GradientTape() as g:
-            g.watch(nn_model.v
-            grads = g.gradient(loss)
-
-        optimizer.apply_gradients
+            g.watch(nn_model.trainable_variables)
+        grads = g.gradient(l, nn_model.trainable_variables)
+        optimizer.apply_gradients(zip(grads, nn_model.trainable_variables))
         
 
         ########## Your code ends here ##########
