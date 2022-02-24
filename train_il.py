@@ -19,8 +19,9 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
         #self.trainable_variables = []
         initializer = tf.keras.initializers.GlorotUniform()
-        self.dense1 = tf.keras.layers.Dense(7, activation = "relu", kernel_initializer=initializer)
-        self.dense2 = tf.keras.layers.Dense(out_size, activation = "relu", kernel_initializer=initializer)
+        self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
+        self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
+        self.dense3 = tf.keras.layers.Dense(out_size, activation = "relu", kernel_initializer=initializer)
         # self.trainable_variables.append(self.dense1)
         # self.trainable_variables.append(self.dense2)
 
@@ -34,8 +35,9 @@ class NN(tf.keras.Model):
 
         out1 = self.dense1(x)
         out2 = self.dense2(out1)
+        out3 = self.dense3(out2)
 
-        return out2 
+        return out3
 
 
 
@@ -52,10 +54,12 @@ def loss(y_est, y):
     # HINT: Remember, you can penalize steering (0th dimension) and throttle (1st dimension) unequally
     steering_dim = 0
     throttle_dim =1 
-    steering_weight = 3
+    steering_weight = 2
     throttle_weight = 1
-    l = steering_weight*tf.nn.l2_loss(tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
-    print(l)
+    #print(y)
+    #print(tf.gather(y,[steering_dim], axis = 1))
+    l = tf.nn.l2_loss(steering_weight*(tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1)))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
+    #print(l)
     return l
 
     ########## Your code ends here ##########
@@ -87,11 +91,12 @@ def nn(data, args):
         # 3. Based on the loss calculate the gradient for all weights
         # 4. Run an optimization step on the weights.
         # Helpful Functions: tf.GradientTape(), tf.GradientTape.gradient(), tf.keras.Optimizer.apply_gradients
-        logits = nn_model.call(x)
-        l = loss(logits, y)
+        #print(nn_model.trainable_variables)
         with tf.GradientTape() as g:
             g.watch(nn_model.trainable_variables)
-            grads = g.gradient(l, nn_model.trainable_variables)
+            logits = nn_model.call(x)
+            current_loss = loss(logits, y)
+        grads = g.gradient(current_loss, nn_model.trainable_variables)
         optimizer.apply_gradients(zip(grads, nn_model.trainable_variables))
         
 
