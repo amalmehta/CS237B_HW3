@@ -20,8 +20,11 @@ class NN(tf.keras.Model):
         #self.trainable_variables = []
         initializer = tf.keras.initializers.GlorotUniform()
         self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
+        self.bn1 = tf.keras.layers.BatchNormalization()
         self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
+        self.bn2 = tf.keras.layers.BatchNormalization()
         self.dense3 = tf.keras.layers.Dense(out_size, activation = "relu", kernel_initializer=initializer)
+        self.bn3 = tf.keras.layers.BatchNormalization()
         # self.trainable_variables.append(self.dense1)
         # self.trainable_variables.append(self.dense2)
 
@@ -33,9 +36,9 @@ class NN(tf.keras.Model):
         # We want to perform a forward-pass of the network. Using the weights and biases, this function should give the network output for x where:
         # x is a (?,|O|) tensor that keeps a batch of observations
 
-        out1 = self.dense1(x)
-        out2 = self.dense2(out1)
-        out3 = self.dense3(out2)
+        out1 = self.bn1(self.dense1(x))
+        out2 = self.bn2(self.dense2(out1))
+        out3 = self.bn3(self.dense3(out2))
 
         return out3
 
@@ -54,11 +57,11 @@ def loss(y_est, y):
     # HINT: Remember, you can penalize steering (0th dimension) and throttle (1st dimension) unequally
     steering_dim = 0
     throttle_dim =1 
-    steering_weight = 2
+    steering_weight = 3
     throttle_weight = 1
     #print(y)
     #print(tf.gather(y,[steering_dim], axis = 1))
-    l = tf.nn.l2_loss(steering_weight*(tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1)))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
+    l = steering_weight*tf.nn.l2_loss((tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1)))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
     #print(l)
     return l
 
