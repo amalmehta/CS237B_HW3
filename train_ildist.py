@@ -44,7 +44,7 @@ class NN(tf.keras.Model):
 
         out1 = self.bn1(self.dense1(x))
         out2 = self.bn2(self.dense2(out1))
-        out3 = self.bn3(self.dense3(out2))
+        out3 = self.dense3(out2)
 
         return out3
 
