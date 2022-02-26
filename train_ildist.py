@@ -67,12 +67,21 @@ def loss(y_est, y):
     epsilon = 1*math.exp(-3)
     mean = y_est[:,:2]
     batch_size = y.shape[0]
-
-    cov = tf.reshape(y_est[:,2:], (batch_size,2,2)) + epsilon * tf.eye(2)
+    add = tf.expand_dims(tf.eye(2), axis = 0)
+    #print(add)
+    A = tf.reshape(y_est[:,2:], (batch_size,2,2)) 
+    A_t = tf.transpose(A, perm = [0,2,1])
+    cov = tf.matmul(A, A_t)
+    cov += epsilon * add
+    #print(cov)
+    #import pdb
+    #pdb.set_trace()
 
     dist = tfd.MultivariateNormalFullCovariance(loc=mean, covariance_matrix=cov)
+    #print("hi")
+    #print(dist.log_prob(y))
 
-    loss = (1.0/batch_size)*tf.math.reduce_sum(dist.log_prob(y))
+    loss = -(1.0/batch_size)*tf.math.reduce_sum(dist.log_prob(y))
 
     return loss
     
@@ -110,7 +119,7 @@ def nn(data, args):
         with tf.GradientTape() as g:
             g.watch(nn_model.trainable_variables)
             logits = nn_model.call(x)
-            print(logits)
+            #print(logits)
             current_loss = loss(logits, y)
         grads = g.gradient(current_loss, nn_model.trainable_variables)
         optimizer.apply_gradients(zip(grads, nn_model.trainable_variables))
