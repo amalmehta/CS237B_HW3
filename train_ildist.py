@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow_probability import distributions as tfd
 import argparse
 from utils import *
+import math
 
 tf.config.run_functions_eagerly(True)
 
@@ -19,6 +20,14 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.GlorotUniform (this is what we tried)
         #         - tf.keras.initializers.GlorotNormal
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
+
+        initializer = tf.keras.initializers.GlorotUniform()
+        self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
+        self.bn1 = tf.keras.layers.BatchNormalization()
+        self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
+        self.bn2 = tf.keras.layers.BatchNormalization()
+        self.dense3 = tf.keras.layers.Dense(out_size, kernel_initializer=initializer)
+        self.bn3 = tf.keras.layers.BatchNormalization()
         
         
         
@@ -30,6 +39,13 @@ class NN(tf.keras.Model):
         # We want to perform a forward-pass of the network. Using the weights and biases, this function should give the network output for x where:
         # x is a (?, |O|) tensor that keeps a batch of observations
         # IMPORTANT: First two columns of the output tensor must correspond to the mean vector!
+
+        out1 = self.bn1(self.dense1(x))
+        out2 = self.bn2(self.dense2(out1))
+        out3 = self.bn3(self.dense3(out2))
+
+        return out3
+
         
         
         
@@ -46,6 +62,16 @@ def loss(y_est, y):
     # At the end your code should return the scalar loss value.
     # HINT: You may find the classes of tensorflow_probability.distributions (imported as tfd) useful.
     #       In particular, you can use MultivariateNormalFullCovariance or MultivariateNormalTriL, but they are not the only way.
+    epsilon = 1*math.exp(-3)
+    mean = y_est[:2]
+    cov = tf.reshape(y_est[2:], (2,2)) + epsilon * tf.eye(2)
+
+    dist = tfd.MultivariateNormalFullCovariance(loc=mean, covariance_matrix=cov)
+    batch_size = len(y)
+
+    loss = (1.0/batch_size)*tf.math.reduce_sum(dist.log_prob(y))
+
+    return loss
     
     
     
@@ -78,7 +104,12 @@ def nn(data, args):
         # 3. Based on the loss calculate the gradient for all weights
         # 4. Run an optimization step on the weights.
         # Helpful Functions: tf.GradientTape(), tf.GradientTape.gradient(), tf.keras.Optimizer.apply_gradients
-       
+        with tf.GradientTape() as g:
+            g.watch(nn_model.trainable_variables)
+            logits = nn_model.call(x)
+            current_loss = loss(logits, y)
+        grads = g.gradient(current_loss, nn_model.trainable_variables)
+        optimizer.apply_gradients(zip(grads, nn_model.trainable_variables))
        
        
         ########## Your code ends here ##########
