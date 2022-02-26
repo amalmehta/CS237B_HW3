@@ -17,18 +17,15 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.GlorotUniform (this is what we tried)
         #         - tf.keras.initializers.GlorotNormal
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
-        #self.trainable_variables = []
         initializer = tf.keras.initializers.GlorotUniform()
         self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.dropout1 = tf.keras.layers.Dropout(0.1)
-        self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
+        self.dense2 = tf.keras.layers.Dense(5, activation = "relu",kernel_initializer=initializer)
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.dropout2 = tf.keras.layers.Dropout(0.1)
-        self.dense3 = tf.keras.layers.Dense(out_size, activation = "relu", kernel_initializer=initializer)
+        self.dense3 = tf.keras.layers.Dense(out_size, kernel_initializer=initializer)
         self.bn3 = tf.keras.layers.BatchNormalization()
-        # self.trainable_variables.append(self.dense1)
-        # self.trainable_variables.append(self.dense2)
 
         ########## Your code ends here ##########
 
@@ -40,7 +37,7 @@ class NN(tf.keras.Model):
 
         out1 = self.bn1(self.dense1(x))
         out2 = self.bn2(self.dense2(out1))
-        out3 = self.bn3(self.dense3(out2))
+        out3 = self.dense3(out2)
 
         return out3
 
@@ -61,7 +58,6 @@ def loss(y_est, y):
     throttle_dim =1 
     steering_weight = 3
     throttle_weight = 1
-    #print(y)
     #print(tf.gather(y,[steering_dim], axis = 1))
     l = steering_weight*tf.nn.l2_loss((tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1)))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
     #print(l)
