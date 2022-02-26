@@ -26,8 +26,10 @@ class NN(tf.keras.Model):
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
         self.bn2 = tf.keras.layers.BatchNormalization()
-        self.dense3 = tf.keras.layers.Dense(out_size, kernel_initializer=initializer)
+        self.dense3 = tf.keras.layers.Dense(6, kernel_initializer=initializer)
         self.bn3 = tf.keras.layers.BatchNormalization()
+
+        print(out_size)
         
         
         
@@ -63,11 +65,12 @@ def loss(y_est, y):
     # HINT: You may find the classes of tensorflow_probability.distributions (imported as tfd) useful.
     #       In particular, you can use MultivariateNormalFullCovariance or MultivariateNormalTriL, but they are not the only way.
     epsilon = 1*math.exp(-3)
-    mean = y_est[:2]
-    cov = tf.reshape(y_est[2:], (2,2)) + epsilon * tf.eye(2)
+    mean = y_est[:,:2]
+    batch_size = y.shape[0]
+
+    cov = tf.reshape(y_est[:,2:], (batch_size,2,2)) + epsilon * tf.eye(2)
 
     dist = tfd.MultivariateNormalFullCovariance(loc=mean, covariance_matrix=cov)
-    batch_size = len(y)
 
     loss = (1.0/batch_size)*tf.math.reduce_sum(dist.log_prob(y))
 
@@ -107,6 +110,7 @@ def nn(data, args):
         with tf.GradientTape() as g:
             g.watch(nn_model.trainable_variables)
             logits = nn_model.call(x)
+            print(logits)
             current_loss = loss(logits, y)
         grads = g.gradient(current_loss, nn_model.trainable_variables)
         optimizer.apply_gradients(zip(grads, nn_model.trainable_variables))
