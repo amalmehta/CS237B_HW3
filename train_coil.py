@@ -44,9 +44,22 @@ class NN(tf.keras.Model):
         # FYI: For the intersection scenario, u=0 means the goal is to turn left, u=1 straight, and u=2 right. 
         # HINT 1: Looping over all data samples may not be the most computationally efficient way of doing branching
         # HINT 2: While implementing this, we found tf.math.equal and tf.cast useful. This is not necessarily a requirement though.
-
+        batch_size = len(u)
+        u= tf.reshape(u, (batch_size,))
+        print(tf.unique(tf.reshape(u, (batch_size,))))
+        print(tf.where(u==0))
+        print(tf.where(u==1))
+        print(tf.where(u==2))
+        print(x)
         features = self.bn1(self.d1(x))
-        if tf.math.equal(u, tf.tensor(0)):
+        left_indices =tf.where(u==0)
+        right_indices = tf.where(u==1)
+        straight_indices = tf.where(u==2)
+
+        left_input = x[left_indices]
+        right_input = x[right_indices]
+        straight_input = x[straight_indices]
+        if tf.math.equal(u, tf.cast(tf.convert_to_tensor([0]), dtype=tf.int8)):
             out = self.dense_left(features)
         elif u == 1:
             out = self.dense_straight(features)
