@@ -29,7 +29,6 @@ class NN(tf.keras.Model):
         self.dense3 = tf.keras.layers.Dense(6, kernel_initializer=initializer)
         self.bn3 = tf.keras.layers.BatchNormalization()
 
-        print(out_size)
         
         
         
