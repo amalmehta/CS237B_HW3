@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+ #!/usr/bin/env python3
 import numpy as np
 import gym_carlo
 import gym
@@ -8,6 +8,9 @@ from gym_carlo.envs.interactive_controllers import KeyboardController
 from scipy.stats import multivariate_normal
 from train_ildist import NN
 from utils import *
+import tensorflow as tf
+import math
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -56,6 +59,25 @@ if __name__ == '__main__':
             # - action (1 x 2 numpy array) is the current action the user took when the observation is obs
             # The code should set a variable called "probs" which is list keeping the probabilities associated with goals[scenario_name], respectively.
             # HINT: multivariate_normal from scipy.stats might be useful, which is already imported. Or you can implement it yourself, too.
+
+            goals_list = goals["intersection"]
+            mean_A_left = nn_models[goals_list[0]](obs)
+            mean_A_right = nn_models[goals_list[1]](obs)
+            mean_A_straight = nn_models[goals_list[2]](obs)
+
+            cov_left = tf.matmul(tf.reshape(mean_A_left[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_left[:,2:],(2,2)))) + math.exp(-3)*tf.eye(2)
+            cov_right = tf.matmul(tf.reshape(mean_A_right[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_right[:,2:],(2,2)))) + math.exp(-3)*tf.eye(2)
+            cov_straight = tf.matmul(tf.reshape(mean_A_straight[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_straight[:,2:],(2,2)))) + math.exp(-3)*tf.eye(2)
+
+            left_prob = multivariate_normal.pdf(action, tf.reshape(mean_A_left[:,:2], (2,)), cov_left)
+            right_prob = multivariate_normal.pdf(action, tf.reshape(mean_A_right[:,:2], (2,)), cov_right)
+            straight_prob = multivariate_normal.pdf(action, tf.reshape(mean_A_straight[:,:2], (2,)), cov_straight)
+            
+            probs = []
+            probs.append(left_prob)
+            probs.append(right_prob)
+            probs.append(straight_prob)
+
 
 
             ########## Your code ends here ##########
