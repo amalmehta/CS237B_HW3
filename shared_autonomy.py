@@ -8,6 +8,8 @@ from gym_carlo.envs.interactive_controllers import KeyboardController
 from scipy.stats import multivariate_normal
 from train_ildist import NN
 from utils import *
+import tensorflow as tf
+import math
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -59,6 +61,33 @@ if __name__ == '__main__':
             # At the end, your code should set a_robot variable as a 1x2 numpy array that consists of steering and throttle values, respectively
             # HINT: You can use np.clip to threshold a_robot with respect to the magnitude constraints
 
+            #only for lanechange 
+            goals_list = goals["lanechange"]
+            mean_A_left = nn_models[goals_list[0]](obs)
+            mean_A_right = nn_models[goals_list[1]](obs)
+
+            mean_left = tf.reshape(mean_A_left[:,:2], (2,))
+            mean_right = mean_A_right[:,:2]
+
+            optimal_action_left = optimal_action[goals_list[0]]
+            optimal_action_right = optimal_action[goals_list[1]]
+            Pg = np.mean(scores, axis = 0)
+
+            left_term = Pg[0] * (optimal_action_left - mean_left)
+            right_term = Pg[1] * (optimal_action_right - mean_right)
+
+            a_robot = left_term + right_term
+            a_robot = np.array(a_robot)
+
+            if a_robot[:, 0] > max_steering:
+                a_robot[:, 0] = max_steering
+
+            if a_robot[:, 1] > max_throttle:
+                a_robot[:, 1] = max_throttle
+
+            
+
+
 
 
             ########## Your code ends here ##########
@@ -76,7 +105,20 @@ if __name__ == '__main__':
             # At the end, your code should set probs variable as a 1 x |G| numpy array that consists of the probability of each goal under obs and a_human
             # HINT: This should be very similar to the part in intent_inference.py 
 
+            goals_list = goals["lanechange"]
+            mean_A_left = nn_models[goals_list[0]](obs)
+            mean_A_right = nn_models[goals_list[1]](obs)
 
+            cov_left = tf.matmul(tf.reshape(mean_A_left[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_left[:,2:],(2,2)))) + math.exp(-3)*tf.eye(2)
+            cov_right = tf.matmul(tf.reshape(mean_A_right[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_right[:,2:],(2,2)))) + math.exp(-3)*tf.eye(2)
+
+            left_prob = multivariate_normal.pdf(a_human, tf.reshape(mean_A_left[:,:2], (2,)), cov_left)
+            right_prob = multivariate_normal.pdf(a_human, tf.reshape(mean_A_right[:,:2], (2,)), cov_right)
+            
+            probs = []
+            probs.append(left_prob)
+            probs.append(right_prob)
+            probs = np.reshape(np.array(probs), (1, len(goals_list)))
 
             ########## Your code ends here ##########
 
