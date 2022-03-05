@@ -67,7 +67,7 @@ if __name__ == '__main__':
             mean_A_right = nn_models[goals_list[1]](obs)
 
             mean_left = tf.reshape(mean_A_left[:,:2], (2,))
-            mean_right = mean_A_right[:,:2]
+            mean_right = tf.reshape(mean_A_right[:,:2], (2,))
 
             optimal_action_left = optimal_action[goals_list[0]]
             optimal_action_right = optimal_action[goals_list[1]]
