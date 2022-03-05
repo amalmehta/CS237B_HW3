@@ -21,23 +21,23 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.GlorotNormal
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
 
-        #for Problem 2
-        # initializer = tf.keras.initializers.GlorotUniform()
-        # self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
-        # self.bn1 = tf.keras.layers.BatchNormalization()
-        # self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
-        # self.bn2 = tf.keras.layers.BatchNormalization()
-        # self.dense3 = tf.keras.layers.Dense(6, kernel_initializer=initializer)
-        # self.bn3 = tf.keras.layers.BatchNormalization()
-
-        #for Problem 4
+        #for Problem 2 and Problem 4ii
         initializer = tf.keras.initializers.GlorotUniform()
-        self.dense1 = tf.keras.layers.Dense(15, activation = "tanh", kernel_initializer=initializer)
+        self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
         self.bn1 = tf.keras.layers.BatchNormalization()
-        self.dense2 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
+        self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.dense3 = tf.keras.layers.Dense(6, kernel_initializer=initializer)
         self.bn3 = tf.keras.layers.BatchNormalization()
+
+        #for Problem 4iv
+        # initializer = tf.keras.initializers.GlorotUniform()
+        # self.dense1 = tf.keras.layers.Dense(15, activation = "tanh", kernel_initializer=initializer)
+        # self.bn1 = tf.keras.layers.BatchNormalization()
+        # self.dense2 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
+        # self.bn2 = tf.keras.layers.BatchNormalization()
+        # self.dense3 = tf.keras.layers.Dense(6, kernel_initializer=initializer)
+        # self.bn3 = tf.keras.layers.BatchNormalization()
 
         
         
@@ -77,18 +77,13 @@ def loss(y_est, y):
     mean = y_est[:,:2]
     batch_size = y.shape[0]
     add = tf.expand_dims(tf.eye(2), axis = 0)
-    #print(add)
+
     A = tf.reshape(y_est[:,2:], (batch_size,2,2)) 
     A_t = tf.transpose(A, perm = [0,2,1])
     cov = tf.matmul(A, A_t)
     cov += epsilon * add
-    #print(cov)
-    #import pdb
-    #pdb.set_trace()
 
     dist = tfd.MultivariateNormalFullCovariance(loc=mean, covariance_matrix=cov)
-    #print("hi")
-    #print(dist.log_prob(y))
 
     loss = -(1.0/batch_size)*tf.math.reduce_sum(dist.log_prob(y))
 
