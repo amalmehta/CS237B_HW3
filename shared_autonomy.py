@@ -109,8 +109,10 @@ if __name__ == '__main__':
             mean_A_left = nn_models[goals_list[0]](obs)
             mean_A_right = nn_models[goals_list[1]](obs)
 
-            cov_left = tf.matmul(tf.reshape(mean_A_left[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_left[:,2:],(2,2)))) + math.exp(-3)*tf.eye(2)
-            cov_right = tf.matmul(tf.reshape(mean_A_right[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_right[:,2:],(2,2)))) + math.exp(-3)*tf.eye(2)
+            eps = math.exp(-3) #1*10**-3
+
+            cov_left = tf.matmul(tf.reshape(mean_A_left[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_left[:,2:],(2,2)))) + eps*tf.eye(2)
+            cov_right = tf.matmul(tf.reshape(mean_A_right[:,2:],(2,2)), tf.transpose(tf.reshape(mean_A_right[:,2:],(2,2)))) + eps*tf.eye(2)
 
             left_prob = multivariate_normal.pdf(a_human, tf.reshape(mean_A_left[:,:2], (2,)), cov_left)
             right_prob = multivariate_normal.pdf(a_human, tf.reshape(mean_A_right[:,:2], (2,)), cov_right)

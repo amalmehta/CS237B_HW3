@@ -73,7 +73,7 @@ def loss(y_est, y):
     # At the end your code should return the scalar loss value.
     # HINT: You may find the classes of tensorflow_probability.distributions (imported as tfd) useful.
     #       In particular, you can use MultivariateNormalFullCovariance or MultivariateNormalTriL, but they are not the only way.
-    epsilon = 1*math.exp(-3)
+    epsilon = math.exp(-3) #1*10**-3
     mean = y_est[:,:2]
     batch_size = y.shape[0]
     add = tf.expand_dims(tf.eye(2), axis = 0)
