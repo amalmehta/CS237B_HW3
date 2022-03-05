@@ -58,9 +58,7 @@ def loss(y_est, y):
     throttle_dim =1 
     steering_weight = 3
     throttle_weight = 1
-    #print(tf.gather(y,[steering_dim], axis = 1))
     l = steering_weight*tf.nn.l2_loss((tf.gather(y,[steering_dim], axis = 1) - tf.gather(y_est,[steering_dim], axis = 1)))+throttle_weight*tf.nn.l2_loss(tf.gather(y,[throttle_dim], axis = 1) - tf.gather(y_est,[throttle_dim], axis = 1))
-    #print(l)
     return l
 
     ########## Your code ends here ##########
