@@ -21,10 +21,20 @@ class NN(tf.keras.Model):
         #         - tf.keras.initializers.GlorotNormal
         #         - tf.keras.initializers.he_uniform or tf.keras.initializers.he_normal
 
+        #for Problem 2
+        # initializer = tf.keras.initializers.GlorotUniform()
+        # self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
+        # self.bn1 = tf.keras.layers.BatchNormalization()
+        # self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
+        # self.bn2 = tf.keras.layers.BatchNormalization()
+        # self.dense3 = tf.keras.layers.Dense(6, kernel_initializer=initializer)
+        # self.bn3 = tf.keras.layers.BatchNormalization()
+
+        #for Problem 4
         initializer = tf.keras.initializers.GlorotUniform()
-        self.dense1 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
+        self.dense1 = tf.keras.layers.Dense(15, activation = "tanh", kernel_initializer=initializer)
         self.bn1 = tf.keras.layers.BatchNormalization()
-        self.dense2 = tf.keras.layers.Dense(5, activation = "relu", kernel_initializer=initializer)
+        self.dense2 = tf.keras.layers.Dense(9, activation = "relu", kernel_initializer=initializer)
         self.bn2 = tf.keras.layers.BatchNormalization()
         self.dense3 = tf.keras.layers.Dense(6, kernel_initializer=initializer)
         self.bn3 = tf.keras.layers.BatchNormalization()
